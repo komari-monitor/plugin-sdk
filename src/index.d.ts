@@ -5,6 +5,18 @@ export type I18nText = string | Record<string, string>;
 export type JsonPrimitive = string | number | boolean | null;
 export type JsonValue = JsonPrimitive | JsonValue[] | { [key: string]: JsonValue };
 
+/** Notification event payload accepted by `admin:sendNotification`.
+ * `event`/`message`/`emoji` accept arbitrary values; `clients` entries only
+ * need a `uuid` (the server resolves full client info).
+ */
+export interface NotificationEventMessage {
+  event?: any;
+  message?: any;
+  emoji?: any;
+  time?: string;
+  clients?: Array<{ uuid: string }>;
+}
+
 /** Runtime metadata returned by `rpc.help`.
  */
 export interface RpcMethodMeta {
@@ -97,6 +109,7 @@ export interface RpcMethodMap {
   "admin:editTrafficReportNotifications": RpcMethodSpec<unknown[], null>;
   "admin:enableTrafficReportNotifications": RpcMethodSpec<string[], null>;
   "admin:disableTrafficReportNotifications": RpcMethodSpec<string[], null>;
+  "admin:sendNotification": RpcMethodSpec<{ event: NotificationEventMessage }, null>;
   "admin:getSessions": RpcMethodSpec<undefined, { current: string; data: unknown[] }>;
   "admin:deleteSession": RpcMethodSpec<{ session: string }, null>;
   "admin:deleteAllSessions": RpcMethodSpec<undefined, null>;

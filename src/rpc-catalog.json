@@ -53,6 +53,7 @@
   "admin:editTrafficReportNotifications": { "params": "TrafficReportNotification[]", "returns": "null" },
   "admin:enableTrafficReportNotifications": { "params": "string[]", "returns": "null" },
   "admin:disableTrafficReportNotifications": { "params": "string[]", "returns": "null" },
+  "admin:sendNotification": { "params": "{ event: { event?: any, message?: any, emoji?: any, time?: string, clients?: { uuid: string }[] } }", "returns": "null" },
   "admin:getSessions": { "params": "none", "returns": "{ current: string, data: Session[] }" },
   "admin:deleteSession": { "params": "{ session: string }", "returns": "null" },
   "admin:deleteAllSessions": { "params": "none", "returns": "null" },
