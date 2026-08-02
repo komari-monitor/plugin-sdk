@@ -1,0 +1,33 @@
+{
+  "name": "@komari-monitor/plugin-sdk",
+  "version": "1.4.0",
+  "komariVersion": "1.4.0",
+  "description": "TypeScript SDK and runtime helpers for Komari server plugins",
+  "license": "MIT",
+  "main": "./src/index.js",
+  "types": "./src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.d.ts",
+      "require": "./src/index.js",
+      "default": "./src/index.js"
+    },
+    "./manifest-schema.json": "./schema/komari-plugin.schema.json"
+  },
+  "files": [
+    "src",
+    "schema",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "test": "node --test test/index.test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/komari-monitor/plugin-sdk.git"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

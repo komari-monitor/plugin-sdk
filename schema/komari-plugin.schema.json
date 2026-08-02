@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://komari-monitor.github.io/plugin-sdk/komari-plugin.schema.json",
+  "title": "Komari Plugin Manifest",
+  "type": "object",
+  "required": ["name", "short"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "name": { "$ref": "#/$defs/localizedText" },
+    "short": { "type": "string", "pattern": "^(?!default$)[A-Za-z0-9_-]+$" },
+    "description": { "$ref": "#/$defs/localizedText" },
+    "author": { "$ref": "#/$defs/localizedText" },
+    "version": { "type": "string" },
+    "url": { "type": "string", "format": "uri" },
+    "icon": { "type": "string" },
+    "komari": { "type": "string" },
+    "entry": { "type": "string", "default": "script.js" },
+    "permissions": { "$ref": "#/$defs/permissions" },
+    "configuration": {
+      "type": "object",
+      "required": ["type", "data"],
+      "properties": {
+        "type": { "const": "managed" },
+        "data": { "type": "array", "items": { "$ref": "#/$defs/configurationItem" } }
+      },
+      "additionalProperties": false
+    },
+    "pages": { "type": "array", "items": { "$ref": "#/$defs/page" } }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "localizedText": {
+      "oneOf": [
+        { "type": "string", "minLength": 1 },
+        { "type": "object", "minProperties": 1, "additionalProperties": { "type": "string" } }
+      ]
+    },
+    "permissions": {
+      "type": "object",
+      "properties": {
+        "node": { "type": "boolean" },
+        "allowSystemRPC": { "type": "boolean" },
+        "allowRoutes": { "type": "boolean" },
+        "allowHooks": { "type": "boolean" },
+        "allowHTMLInject": { "type": "boolean" },
+        "allowExec": { "type": "boolean" },
+        "allowListen": { "type": "boolean" },
+        "allowAllFileAccess": { "type": "boolean" },
+        "maxHTTPBodyBytes": { "type": "integer", "minimum": 0 },
+        "maxChildOutputBytes": { "type": "integer", "minimum": 0 },
+        "timeout": { "type": "integer", "minimum": 0 }
+      },
+      "additionalProperties": false
+    },
+    "page": {
+      "type": "object",
+      "required": ["title"],
+      "properties": {
+        "file": { "type": "string" },
+        "title": { "$ref": "#/$defs/localizedText" },
+        "icon": { "type": "string" },
+        "type": { "enum": ["iframe", "redirect"] },
+        "url": { "type": "string" },
+        "visibility": { "enum": ["admin", "public"] }
+      },
+      "additionalProperties": false
+    },
+    "configurationItem": {
+      "type": "object",
+      "required": ["key", "name", "type"],
+      "properties": {
+        "key": { "type": "string", "minLength": 1 },
+        "name": { "$ref": "#/$defs/localizedText" },
+        "type": { "enum": ["string", "number", "select", "switch", "title", "richtext"] },
+        "options": { "type": "string" },
+        "default": {},
+        "required": { "type": "boolean" },
+        "help": { "$ref": "#/$defs/localizedText" }
+      },
+      "additionalProperties": false
+    }
+  }
+}
