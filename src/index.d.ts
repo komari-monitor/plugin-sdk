@@ -447,4 +447,16 @@ export declare function assertValidManifest(manifest: unknown): asserts manifest
  */
 export declare const manifestSchema: unknown;
 
-declare const __storageDir__: string;
+/** Runtime globals provided by Komari when the corresponding capability is enabled. */
+declare global {
+  /**
+   * Absolute long-term storage directory for this plugin.
+   * Available when the manifest enables `permissions.node`.
+   */
+  const __storageDir__: string;
+  /**
+   * CommonJS module loader provided by Komari's Node.js-compatible runtime.
+   * Available when the manifest enables `permissions.node`.
+   */
+  function require(moduleName: string): any;
+}

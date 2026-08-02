@@ -5,6 +5,24 @@ TypeScript types and small runtime helpers for Komari server plugins.
 The package targets Komari's CommonJS goja runtime. It does not add browser APIs
 or assume a full Node.js implementation.
 
+When `permissions.node` is enabled in the manifest, the SDK also declares the
+Komari runtime globals `require(...)` and `__storageDir__` for TypeScript. The
+storage directory is an absolute path intended for data that should survive
+plugin rebuilds and reinstalls.
+
+```ts
+import { definePlugin } from "@komari-monitor/plugin-sdk";
+
+const fs = require("fs");
+
+definePlugin({
+  load() {
+    console.log(__storageDir__);
+    console.log(fs.existsSync(__storageDir__));
+  },
+});
+```
+
 Add the following to `komari-plugin.json` to enable manifest completion in VS
 Code:
 
