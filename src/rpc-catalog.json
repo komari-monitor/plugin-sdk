@@ -1,5 +1,5 @@
 {
-  "komari": "1.4.0",
+  "komari": "1.4.x",
   "rpc.methods": { "params": "{ internal?: boolean }", "returns": "string[]" },
   "rpc.version": { "params": "none", "returns": "string" },
   "rpc.ping": { "params": "none", "returns": "string ('pong')" },

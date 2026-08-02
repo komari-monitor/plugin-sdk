@@ -2,80 +2,86 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://komari-monitor.github.io/plugin-sdk/komari-plugin.schema.json",
   "title": "Komari Plugin Manifest",
+  "description": "Komari plugin manifest.",
   "type": "object",
   "required": ["name", "short"],
   "properties": {
-    "$schema": { "type": "string" },
-    "name": { "$ref": "#/$defs/localizedText" },
-    "short": { "type": "string", "pattern": "^(?!default$)[A-Za-z0-9_-]+$" },
-    "description": { "$ref": "#/$defs/localizedText" },
-    "author": { "$ref": "#/$defs/localizedText" },
-    "version": { "type": "string" },
-    "url": { "type": "string", "format": "uri" },
-    "icon": { "type": "string" },
-    "komari": { "type": "string" },
-    "entry": { "type": "string", "default": "script.js" },
-    "permissions": { "$ref": "#/$defs/permissions" },
+    "$schema": { "type": "string", "description": "Schema URL used for editor validation." },
+    "name": { "$ref": "#/$defs/localizedText", "description": "Display name shown in Komari." },
+    "short": { "type": "string", "pattern": "^(?!default$)[A-Za-z0-9_-]+$", "description": "Stable plugin identifier used in routes and RPC names." },
+    "description": { "$ref": "#/$defs/localizedText", "description": "Human-readable plugin description." },
+    "author": { "$ref": "#/$defs/localizedText", "description": "Plugin author or organization." },
+    "version": { "type": "string", "description": "Plugin version." },
+    "url": { "type": "string", "format": "uri", "description": "Project or documentation URL." },
+    "icon": { "type": "string", "description": "Icon URL or plugin-relative icon path." },
+    "komari": { "type": "string", "description": "Compatible Komari version constraint, such as `>=1.4.0`." },
+    "entry": { "type": "string", "default": "script.js", "description": "Compiled plugin entry file, relative to the package root." },
+    "permissions": { "$ref": "#/$defs/permissions", "description": "Runtime permissions requested by the plugin." },
     "configuration": {
       "type": "object",
       "required": ["type", "data"],
       "properties": {
-        "type": { "const": "managed" },
-        "data": { "type": "array", "items": { "$ref": "#/$defs/configurationItem" } }
+        "type": { "const": "managed", "description": "Use Komari-managed configuration storage." },
+        "data": { "type": "array", "items": { "$ref": "#/$defs/configurationItem" }, "description": "Configuration items shown in the admin UI." }
       },
-      "additionalProperties": false
+      "additionalProperties": false,
+      "description": "Optional configuration schema rendered by Komari."
     },
-    "pages": { "type": "array", "items": { "$ref": "#/$defs/page" } }
+    "pages": { "type": "array", "items": { "$ref": "#/$defs/page" }, "description": "Admin or public pages contributed by the plugin." }
   },
   "additionalProperties": false,
   "$defs": {
     "localizedText": {
+      "description": "A string or a language-to-string map.",
       "oneOf": [
         { "type": "string", "minLength": 1 },
         { "type": "object", "minProperties": 1, "additionalProperties": { "type": "string" } }
       ]
     },
     "permissions": {
+      "description": "Capabilities that must be approved before enabling the plugin.",
       "type": "object",
       "properties": {
-        "node": { "type": "boolean" },
-        "allowSystemRPC": { "type": "boolean" },
-        "allowRoutes": { "type": "boolean" },
-        "allowHooks": { "type": "boolean" },
-        "allowHTMLInject": { "type": "boolean" },
-        "allowExec": { "type": "boolean" },
-        "allowListen": { "type": "boolean" },
-        "allowAllFileAccess": { "type": "boolean" },
-        "maxHTTPBodyBytes": { "type": "integer", "minimum": 0 },
-        "maxChildOutputBytes": { "type": "integer", "minimum": 0 },
-        "timeout": { "type": "integer", "minimum": 0 }
+        "node": { "type": "boolean", "description": "Enable Node.js-compatible modules." },
+        "allowSystemRPC": { "type": "boolean", "description": "Allow calls to system RPC methods." },
+        "allowRoutes": { "type": "boolean", "description": "Allow HTTP routes and static files." },
+        "allowHooks": { "type": "boolean", "description": "Allow request and response hooks." },
+        "allowHTMLInject": { "type": "boolean", "description": "Allow HTML head/body injection." },
+        "allowExec": { "type": "boolean", "description": "Allow child process execution." },
+        "allowListen": { "type": "boolean", "description": "Allow the plugin to listen on a local port." },
+        "allowAllFileAccess": { "type": "boolean", "description": "Allow file access outside the plugin directory." },
+        "maxHTTPBodyBytes": { "type": "integer", "minimum": 0, "description": "Maximum request body size in bytes." },
+        "maxChildOutputBytes": { "type": "integer", "minimum": 0, "description": "Maximum captured child process output in bytes." },
+        "timeout": { "type": "integer", "minimum": 0, "description": "Plugin execution timeout in seconds." }
       },
       "additionalProperties": false
     },
     "page": {
+      "description": "A page exposed by the plugin.",
       "type": "object",
       "required": ["title"],
       "properties": {
-        "file": { "type": "string" },
-        "title": { "$ref": "#/$defs/localizedText" },
-        "icon": { "type": "string" },
-        "type": { "enum": ["iframe", "redirect"] },
-        "url": { "type": "string" },
-        "visibility": { "enum": ["admin", "public"] }
+        "file": { "type": "string", "description": "Page file relative to the plugin package." },
+        "title": { "$ref": "#/$defs/localizedText", "description": "Page title shown in navigation." },
+        "icon": { "type": "string", "description": "Page icon name or URL." },
+        "type": { "enum": ["iframe", "redirect"], "description": "Page presentation mode." },
+        "url": { "type": "string", "description": "Target URL for redirect pages." },
+        "visibility": { "enum": ["admin", "public"], "description": "Whether the page is visible to admins or the public." }
       },
       "additionalProperties": false
     },
     "configurationItem": {
+      "description": "One managed configuration field.",
       "type": "object",
       "required": ["key", "name", "type"],
       "properties": {
-        "key": { "type": "string", "minLength": 1 },
-        "name": { "$ref": "#/$defs/localizedText" },
-        "type": { "enum": ["string", "number", "select", "switch", "title", "richtext"] },
-        "options": { "type": "string" },
-        "default": {},
-        "required": { "type": "boolean" },
-        "help": { "$ref": "#/$defs/localizedText" }
+        "key": { "type": "string", "minLength": 1, "description": "Stable configuration key." },
+        "name": { "$ref": "#/$defs/localizedText", "description": "Label shown in the configuration UI." },
+        "type": { "enum": ["string", "number", "select", "switch", "title", "richtext"], "description": "Editor control type." },
+        "options": { "type": "string", "description": "Options for select controls." },
+        "default": { "description": "Default value." },
+        "required": { "type": "boolean", "description": "Whether a value is required." },
+        "help": { "$ref": "#/$defs/localizedText", "description": "Help text shown below the field." }
       },
       "additionalProperties": false
     }

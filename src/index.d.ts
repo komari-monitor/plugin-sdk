@@ -1,7 +1,12 @@
+/**
+ * Localized text: either a plain string or a map keyed by language code.
+ */
 export type I18nText = string | Record<string, string>;
 export type JsonPrimitive = string | number | boolean | null;
 export type JsonValue = JsonPrimitive | JsonValue[] | { [key: string]: JsonValue };
 
+/** Runtime metadata returned by `rpc.help`.
+ */
 export interface RpcMethodMeta {
   name: string;
   summary?: string;
@@ -16,11 +21,15 @@ export interface RpcMethodMeta {
   example?: JsonValue;
 }
 
+/** Version and registry hash reported by Komari.
+ */
 export interface RpcVersionInfo {
   version: string;
   hash: string;
 }
 
+/** Type-level parameter/result pair for one RPC method.
+ */
 export interface RpcMethodSpec<Params, Result> {
   params: Params;
   result: Result;
@@ -137,10 +146,32 @@ export type RpcCallArgs<P> = [P] extends [undefined]
     ? [] | [params: Exclude<P, undefined>]
     : [params: P];
 
+/** Typed RPC client bound to the current Komari server.
+ */
 export interface RpcClient {
+  /**
+   * Calls a declared Komari RPC method with typed parameters and result.
+   *
+   * Methods outside the catalog can be called through `server.call`.
+   * @param method Registered RPC method name.
+   * @param params Optional parameters for the method.
+   */
   call<M extends RpcMethodName>(method: M, ...params: RpcCallArgs<RpcMethodParams<M>>): Promise<RpcMethodResult<M>>;
+  /**
+   * Lists methods registered by the current server.
+   * @param includeInternal Include internal methods when true; this may require
+   * the plugin `allowSystemRPC` permission.
+   */
   methods(includeInternal?: boolean): Promise<string[]>;
+  /**
+   * Checks whether a method exists without executing the method itself.
+   * @param method Fully qualified method name, for example `common:getNodes`.
+   */
   has(method: string): Promise<boolean>;
+  /**
+   * Gets runtime metadata for one method, including parameter and result descriptions when provided by the server.
+   * @param method Fully qualified method name.
+   */
   help(method: string): Promise<RpcMethodMeta>;
 }
 
@@ -198,32 +229,107 @@ export interface PluginResponse {
   statusCode: number;
   statusMessage?: string;
   streaming: boolean;
+  /** Sets a response header before the response is sent.
+   */
   setHeader(name: string, value: string | string[]): this;
+  /** Reads a response header.
+   */
   getHeader(name: string): string | string[] | undefined;
+  /** Removes a response header.
+   */
   removeHeader(name: string): void;
+  /** Writes a response chunk; returns whether the stream can continue.
+   */
   write(data: string | Uint8Array): boolean;
+  /** Ends the response, optionally writing one final chunk.
+   */
   end(data?: string): this;
+  /** Returns true when the client has disconnected.
+   */
   isAborted(): boolean;
 }
 
+/** Handler used by `server.route`.
+ */
 export type RouteHandler = (req: PluginRequest, res: PluginResponse) => unknown | Promise<unknown>;
+/** Handler used by `server.registerRPC`.
+ */
 export type RpcHandler = (...params: any[]) => unknown | Promise<unknown>;
 
+/** Host services injected into a Komari plugin.
+ */
 export interface PluginServer {
+  /**
+   * Registers an HTTP route owned by this plugin.
+   * @param method HTTP method, such as `GET` or `POST`.
+   * @param path Route path, such as `/hello`.
+   * @param handler Request handler.
+   * @remarks Requires the `permissions.allowRoutes` manifest permission.
+   */
   route(method: string, path: string, handler: RouteHandler): void;
+  /**
+   * Serves a directory as plugin static files.
+   * @param path URL mount path.
+   * @param directory Plugin-relative directory.
+   * @param options Set `spa: true` to fall back to the index page.
+   * @remarks Requires the `permissions.allowRoutes` manifest permission.
+   */
   static(path: string, directory: string, options?: { spa?: boolean }): void;
+  /**
+   * Adds a request or response hook.
+   * @param kind Hook phase: `request` or `response`.
+   * @param handler Hook callback, or use the matcher overload below.
+   * @remarks Requires the `permissions.allowHooks` manifest permission.
+   */
   hook(kind: "request" | "response", handler: (...args: any[]) => unknown): void;
+  /** Adds a hook that only runs for matching requests.
+   */
   hook(kind: "request" | "response", matcher: string, handler: (...args: any[]) => unknown): void;
+  /**
+   * Injects HTML into the page head and body.
+   * @param head HTML inserted before `</head>`.
+   * @param body HTML inserted before `</body>`.
+   * @remarks Requires the `permissions.allowHTMLInject` manifest permission.
+   */
   injectHTML(head: string, body: string): void;
+  /**
+   * Calls a typed method from the current Komari RPC registry.
+   * @param method Known catalog method name.
+   * @param params Method parameters.
+   */
   call<M extends RpcMethodName>(method: M, ...params: RpcCallArgs<RpcMethodParams<M>>): Promise<RpcMethodResult<M>>;
+  /** Calls a dynamic or plugin-owned RPC method.
+   * @param method Fully qualified method name.
+   * @param params Method parameters.
+   */
   call<T = unknown>(method: string, ...params: any[]): Promise<T>;
+  /**
+   * Registers an RPC method owned by this plugin.
+   * @param method Method name, usually in the `plugin:` namespace.
+   * @param handler Method handler.
+   */
   registerRPC(method: string, handler: RpcHandler): void;
+  /**
+   * Schedules a cron callback.
+   * @param expression Standard five-field cron expression.
+   * @param handler Callback invoked on schedule.
+   */
   cron(expression: string, handler: () => unknown | Promise<unknown>): void;
+  /**
+   * Reads the plugin's saved configuration values.
+   * @returns The saved configuration object, or an empty object when unset.
+   */
   getConfig<T extends Record<string, unknown> = Record<string, unknown>>(): Promise<T>;
 }
 
+/** Lifecycle callbacks installed by `definePlugin`.
+ */
 export interface PluginDefinition {
+  /** Called when Komari loads or reloads the plugin.
+   */
   load?: () => unknown | Promise<unknown>;
+  /** Called before Komari unloads or replaces the plugin.
+   */
   unload?: () => unknown | Promise<unknown>;
 }
 
@@ -286,14 +392,59 @@ export type RpcCatalog = {
   [method in RpcMethodName]: RpcCatalogEntry;
 };
 
+/**
+ * Lazily loaded host API for the current plugin.
+ */
 export declare const server: PluginServer;
+/**
+ * Typed RPC client for the current Komari server.
+ */
 export declare const rpc: RpcClient;
+/**
+ * Komari 1.4.x RPC method catalog with parameter and result descriptions.
+ */
 export declare const rpcCatalog: RpcCatalog;
+/**
+ * Installs the plugin lifecycle callbacks expected by Komari.
+ *
+ * The definition is returned unchanged, so this function preserves the
+ * inferred type of the object passed to it.
+ * @param definition Plugin load/unload callbacks.
+ * @returns The same definition object.
+ */
 export declare function definePlugin<T extends PluginDefinition>(definition: T): T;
+/**
+ * Sends a JSON response and ends the current request.
+ * @param res Plugin response object.
+ * @param value Value serialized with `JSON.stringify`.
+ * @param statusCode HTTP status code, defaulting to `200`.
+ * @returns The same response object for fluent usage.
+ */
 export declare function jsonResponse<T>(res: PluginResponse, value: T, statusCode?: number): PluginResponse;
+/**
+ * Sends a text response and ends the current request.
+ * @param res Plugin response object.
+ * @param value Text converted with `String`.
+ * @param statusCode HTTP status code, defaulting to `200`.
+ * @param contentType Response content type, defaulting to UTF-8 text.
+ * @returns The same response object for fluent usage.
+ */
 export declare function textResponse(res: PluginResponse, value: string, statusCode?: number, contentType?: string): PluginResponse;
+/**
+ * Validates a manifest and returns human-readable validation errors.
+ * @param manifest Unknown value to validate.
+ * @returns An empty array when valid.
+ */
 export declare function validateManifest(manifest: unknown): string[];
+/**
+ * Validates a manifest or throws when it is invalid.
+ * @param manifest Unknown manifest value.
+ * @throws Error when the manifest violates the SDK schema.
+ */
 export declare function assertValidManifest(manifest: unknown): asserts manifest is PluginManifest;
+/**
+ * JSON Schema used by the Komari plugin manifest editor and validator.
+ */
 export declare const manifestSchema: unknown;
 
 declare const __storageDir__: string;
