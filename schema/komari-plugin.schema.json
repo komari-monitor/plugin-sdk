@@ -2,80 +2,86 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://komari-monitor.github.io/plugin-sdk/komari-plugin.schema.json",
   "title": "Komari Plugin Manifest",
+  "description": "Komari plugin manifest. / Komari 插件 manifest 配置文件。",
   "type": "object",
   "required": ["name", "short"],
   "properties": {
-    "$schema": { "type": "string" },
-    "name": { "$ref": "#/$defs/localizedText" },
-    "short": { "type": "string", "pattern": "^(?!default$)[A-Za-z0-9_-]+$" },
-    "description": { "$ref": "#/$defs/localizedText" },
-    "author": { "$ref": "#/$defs/localizedText" },
-    "version": { "type": "string" },
-    "url": { "type": "string", "format": "uri" },
-    "icon": { "type": "string" },
-    "komari": { "type": "string" },
-    "entry": { "type": "string", "default": "script.js" },
-    "permissions": { "$ref": "#/$defs/permissions" },
+    "$schema": { "type": "string", "description": "Schema URL used for editor validation. / 用于编辑器校验的 Schema 地址。" },
+    "name": { "$ref": "#/$defs/localizedText", "description": "Display name shown in Komari. / 在 Komari 中显示的插件名称。" },
+    "short": { "type": "string", "pattern": "^(?!default$)[A-Za-z0-9_-]+$", "description": "Stable plugin identifier used in routes and RPC names. / 用于路由和 RPC 名称的稳定插件标识。" },
+    "description": { "$ref": "#/$defs/localizedText", "description": "Human-readable plugin description. / 插件的人类可读描述。" },
+    "author": { "$ref": "#/$defs/localizedText", "description": "Plugin author or organization. / 插件作者或组织。" },
+    "version": { "type": "string", "description": "Plugin version. / 插件版本。" },
+    "url": { "type": "string", "format": "uri", "description": "Project or documentation URL. / 项目或文档地址。" },
+    "icon": { "type": "string", "description": "Icon URL or plugin-relative icon path. / 图标 URL 或插件内图标路径。" },
+    "komari": { "type": "string", "description": "Compatible Komari version constraint. / 兼容的 Komari 版本约束。" },
+    "entry": { "type": "string", "default": "script.js", "description": "Compiled plugin entry file, relative to the package root. / 编译后的插件入口文件，相对于插件根目录。" },
+    "permissions": { "$ref": "#/$defs/permissions", "description": "Runtime permissions requested by the plugin. / 插件申请的运行时权限。" },
     "configuration": {
       "type": "object",
       "required": ["type", "data"],
       "properties": {
-        "type": { "const": "managed" },
-        "data": { "type": "array", "items": { "$ref": "#/$defs/configurationItem" } }
+        "type": { "const": "managed", "description": "Use Komari-managed configuration storage. / 使用 Komari 管理的配置存储。" },
+        "data": { "type": "array", "items": { "$ref": "#/$defs/configurationItem" }, "description": "Configuration items shown in the admin UI. / 在管理界面显示的配置项。" }
       },
-      "additionalProperties": false
+      "additionalProperties": false,
+      "description": "Optional configuration schema rendered by Komari. / 由 Komari 渲染的可选配置定义。"
     },
-    "pages": { "type": "array", "items": { "$ref": "#/$defs/page" } }
+    "pages": { "type": "array", "items": { "$ref": "#/$defs/page" }, "description": "Admin or public pages contributed by the plugin. / 插件提供的管理页或公开页面。" }
   },
   "additionalProperties": false,
   "$defs": {
     "localizedText": {
+      "description": "A string or a language-to-string map. / 字符串或语言到字符串的映射。",
       "oneOf": [
         { "type": "string", "minLength": 1 },
         { "type": "object", "minProperties": 1, "additionalProperties": { "type": "string" } }
       ]
     },
     "permissions": {
+      "description": "Capabilities that must be approved before enabling the plugin. / 启用插件前需要批准的能力。",
       "type": "object",
       "properties": {
-        "node": { "type": "boolean" },
-        "allowSystemRPC": { "type": "boolean" },
-        "allowRoutes": { "type": "boolean" },
-        "allowHooks": { "type": "boolean" },
-        "allowHTMLInject": { "type": "boolean" },
-        "allowExec": { "type": "boolean" },
-        "allowListen": { "type": "boolean" },
-        "allowAllFileAccess": { "type": "boolean" },
-        "maxHTTPBodyBytes": { "type": "integer", "minimum": 0 },
-        "maxChildOutputBytes": { "type": "integer", "minimum": 0 },
-        "timeout": { "type": "integer", "minimum": 0 }
+        "node": { "type": "boolean", "description": "Enable Node.js-compatible modules. / 启用 Node.js 兼容模块。" },
+        "allowSystemRPC": { "type": "boolean", "description": "Allow calls to system RPC methods. / 允许调用系统 RPC 方法。" },
+        "allowRoutes": { "type": "boolean", "description": "Allow HTTP routes and static files. / 允许注册 HTTP 路由和静态文件。" },
+        "allowHooks": { "type": "boolean", "description": "Allow request and response hooks. / 允许注册请求和响应钩子。" },
+        "allowHTMLInject": { "type": "boolean", "description": "Allow HTML head/body injection. / 允许注入 HTML head/body。" },
+        "allowExec": { "type": "boolean", "description": "Allow child process execution. / 允许执行子进程。" },
+        "allowListen": { "type": "boolean", "description": "Allow the plugin to listen on a local port. / 允许插件监听本地端口。" },
+        "allowAllFileAccess": { "type": "boolean", "description": "Allow file access outside the plugin directory. / 允许访问插件目录之外的文件。" },
+        "maxHTTPBodyBytes": { "type": "integer", "minimum": 0, "description": "Maximum request body size in bytes. / 请求体最大字节数。" },
+        "maxChildOutputBytes": { "type": "integer", "minimum": 0, "description": "Maximum captured child process output in bytes. / 捕获的子进程输出最大字节数。" },
+        "timeout": { "type": "integer", "minimum": 0, "description": "Plugin execution timeout in seconds. / 插件执行超时时间，单位为秒。" }
       },
       "additionalProperties": false
     },
     "page": {
+      "description": "A page exposed by the plugin. / 插件提供的页面。",
       "type": "object",
       "required": ["title"],
       "properties": {
-        "file": { "type": "string" },
-        "title": { "$ref": "#/$defs/localizedText" },
-        "icon": { "type": "string" },
-        "type": { "enum": ["iframe", "redirect"] },
-        "url": { "type": "string" },
-        "visibility": { "enum": ["admin", "public"] }
+        "file": { "type": "string", "description": "Page file relative to the plugin package. / 相对于插件包的页面文件。" },
+        "title": { "$ref": "#/$defs/localizedText", "description": "Page title shown in navigation. / 在导航中显示的页面标题。" },
+        "icon": { "type": "string", "description": "Page icon name or URL. / 页面图标名称或 URL。" },
+        "type": { "enum": ["iframe", "redirect"], "description": "Page presentation mode. / 页面展示方式。" },
+        "url": { "type": "string", "description": "Target URL for redirect pages. / redirect 页面使用的目标地址。" },
+        "visibility": { "enum": ["admin", "public"], "description": "Whether the page is visible to admins or the public. / 页面面向管理员还是公开访问。" }
       },
       "additionalProperties": false
     },
     "configurationItem": {
+      "description": "One managed configuration field. / 一个由 Komari 管理的配置字段。",
       "type": "object",
       "required": ["key", "name", "type"],
       "properties": {
-        "key": { "type": "string", "minLength": 1 },
-        "name": { "$ref": "#/$defs/localizedText" },
-        "type": { "enum": ["string", "number", "select", "switch", "title", "richtext"] },
-        "options": { "type": "string" },
-        "default": {},
-        "required": { "type": "boolean" },
-        "help": { "$ref": "#/$defs/localizedText" }
+        "key": { "type": "string", "minLength": 1, "description": "Stable configuration key. / 稳定的配置键名。" },
+        "name": { "$ref": "#/$defs/localizedText", "description": "Label shown in the configuration UI. / 在配置界面显示的标签。" },
+        "type": { "enum": ["string", "number", "select", "switch", "title", "richtext"], "description": "Editor control type. / 编辑控件类型。" },
+        "options": { "type": "string", "description": "Options for select controls. / select 控件的选项。" },
+        "default": { "description": "Default value. / 默认值。" },
+        "required": { "type": "boolean", "description": "Whether a value is required. / 是否必须填写。" },
+        "help": { "$ref": "#/$defs/localizedText", "description": "Help text shown below the field. / 显示在字段下方的帮助文本。" }
       },
       "additionalProperties": false
     }

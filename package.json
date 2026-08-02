@@ -1,7 +1,7 @@
 {
   "name": "@komari-monitor/plugin-sdk",
-  "version": "1.4.0",
-  "komariVersion": "1.4.0",
+  "version": "1.4.1",
+  "komariVersion": "1.4.1",
   "description": "TypeScript SDK and runtime helpers for Komari server plugins",
   "license": "MIT",
   "main": "./src/index.js",
