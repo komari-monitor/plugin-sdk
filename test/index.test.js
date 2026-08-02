@@ -42,6 +42,12 @@ test("package and RPC catalog versions distinguish SDK release from Komari compa
   assert.equal(rpcCatalog.komari, "1.4.x");
 });
 
+test("Node-compatible runtime globals are available to plugin TypeScript", () => {
+  assert.match(declarations, /declare global\s*\{/);
+  assert.match(declarations, /const __storageDir__: string;/);
+  assert.match(declarations, /function require\(moduleName: string\): any;/);
+});
+
 test("jsonResponse writes JSON content", () => {
   const calls = [];
   const response = {
