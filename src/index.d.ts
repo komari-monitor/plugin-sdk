@@ -6,7 +6,6 @@ export type JsonPrimitive = string | number | boolean | null;
 export type JsonValue = JsonPrimitive | JsonValue[] | { [key: string]: JsonValue };
 
 /** Runtime metadata returned by `rpc.help`.
- * Runtime method metadata returned by `rpc.help`.
  */
 export interface RpcMethodMeta {
   name: string;
@@ -23,7 +22,6 @@ export interface RpcMethodMeta {
 }
 
 /** Version and registry hash reported by Komari.
- * Version and method registry hash reported by Komari.
  */
 export interface RpcVersionInfo {
   version: string;
@@ -31,7 +29,6 @@ export interface RpcVersionInfo {
 }
 
 /** Type-level parameter/result pair for one RPC method.
- * Type-level parameter and result pair for one RPC method.
  */
 export interface RpcMethodSpec<Params, Result> {
   params: Params;
@@ -150,21 +147,17 @@ export type RpcCallArgs<P> = [P] extends [undefined]
     : [params: P];
 
 /** Typed RPC client bound to the current Komari server.
- * Type-safe RPC client bound to the current Komari server.
  */
 export interface RpcClient {
   /**
    * Calls a declared Komari RPC method with typed parameters and result.
-   * Calls a declared Komari RPC method with typed parameters and result.
    *
    * Methods outside the catalog can be called through `server.call`.
-   * Use `server.call` for methods outside the catalog.
    * @param method Registered RPC method name.
    * @param params Optional parameters for the method.
    */
   call<M extends RpcMethodName>(method: M, ...params: RpcCallArgs<RpcMethodParams<M>>): Promise<RpcMethodResult<M>>;
   /**
-   * Lists methods registered by the current server.
    * Lists methods registered by the current server.
    * @param includeInternal Include internal methods when true; this may require
    * the plugin `allowSystemRPC` permission.
@@ -172,12 +165,10 @@ export interface RpcClient {
   methods(includeInternal?: boolean): Promise<string[]>;
   /**
    * Checks whether a method exists without executing the method itself.
-   * Checks whether a method exists without executing the method itself.
    * @param method Fully qualified method name, for example `common:getNodes`.
    */
   has(method: string): Promise<boolean>;
   /**
-   * Gets runtime metadata for one method.
    * Gets runtime metadata for one method, including parameter and result descriptions when provided by the server.
    * @param method Fully qualified method name.
    */
@@ -239,101 +230,80 @@ export interface PluginResponse {
   statusMessage?: string;
   streaming: boolean;
   /** Sets a response header before the response is sent.
-   * Sets a response header before the response is sent.
    */
   setHeader(name: string, value: string | string[]): this;
   /** Reads a response header.
-   * Reads a response header.
    */
   getHeader(name: string): string | string[] | undefined;
   /** Removes a response header.
-   * Removes a response header.
    */
   removeHeader(name: string): void;
   /** Writes a response chunk; returns whether the stream can continue.
-   * Writes a response chunk and returns whether the stream can continue.
    */
   write(data: string | Uint8Array): boolean;
   /** Ends the response, optionally writing one final chunk.
-   * Optionally writes a final chunk and ends the response.
    */
   end(data?: string): this;
   /** Returns true when the client has disconnected.
-   * Returns true when the client has disconnected.
    */
   isAborted(): boolean;
 }
 
 /** Handler used by `server.route`.
- * Request handler used by `server.route`.
  */
 export type RouteHandler = (req: PluginRequest, res: PluginResponse) => unknown | Promise<unknown>;
 /** Handler used by `server.registerRPC`.
- * RPC handler used by `server.registerRPC`.
  */
 export type RpcHandler = (...params: any[]) => unknown | Promise<unknown>;
 
 /** Host services injected into a Komari plugin.
- * Host services injected into a Komari plugin.
  */
 export interface PluginServer {
   /**
    * Registers an HTTP route owned by this plugin.
-   * Registers an HTTP route owned by this plugin.
    * @param method HTTP method, such as `GET` or `POST`.
    * @param path Route path, such as `/hello`.
    * @param handler Request handler.
-   * @remarks Requires the manifest `permissions.allowRoutes` permission.
-   * Requires the `permissions.allowRoutes` manifest permission.
+   * @remarks Requires the `permissions.allowRoutes` manifest permission.
    */
   route(method: string, path: string, handler: RouteHandler): void;
   /**
    * Serves a directory as plugin static files.
-   * Serves a directory as plugin static files.
    * @param path URL mount path.
    * @param directory Plugin-relative directory.
    * @param options Set `spa: true` to fall back to the index page.
-   * @remarks Requires `permissions.allowRoutes`.
-   * Requires the `permissions.allowRoutes` manifest permission.
+   * @remarks Requires the `permissions.allowRoutes` manifest permission.
    */
   static(path: string, directory: string, options?: { spa?: boolean }): void;
   /**
    * Adds a request or response hook.
-   * Adds a request or response hook.
    * @param kind Hook phase: `request` or `response`.
    * @param handler Hook callback, or use the matcher overload below.
-   * @remarks Requires `permissions.allowHooks`.
-   * Requires the `permissions.allowHooks` manifest permission.
+   * @remarks Requires the `permissions.allowHooks` manifest permission.
    */
   hook(kind: "request" | "response", handler: (...args: any[]) => unknown): void;
   /** Adds a hook that only runs for matching requests.
-   * Adds a hook that only runs for matching requests.
    */
   hook(kind: "request" | "response", matcher: string, handler: (...args: any[]) => unknown): void;
   /**
    * Injects HTML into the page head and body.
-   * Injects HTML into the page head and body.
    * @param head HTML inserted before `</head>`.
    * @param body HTML inserted before `</body>`.
-   * @remarks Requires `permissions.allowHTMLInject`.
-   * Requires the `permissions.allowHTMLInject` manifest permission.
+   * @remarks Requires the `permissions.allowHTMLInject` manifest permission.
    */
   injectHTML(head: string, body: string): void;
   /**
-   * Calls a typed method from the current Komari RPC registry.
    * Calls a typed method from the current Komari RPC registry.
    * @param method Known catalog method name.
    * @param params Method parameters.
    */
   call<M extends RpcMethodName>(method: M, ...params: RpcCallArgs<RpcMethodParams<M>>): Promise<RpcMethodResult<M>>;
   /** Calls a dynamic or plugin-owned RPC method.
-   * Calls a dynamic or plugin-owned RPC method.
    * @param method Fully qualified method name.
    * @param params Method parameters.
    */
   call<T = unknown>(method: string, ...params: any[]): Promise<T>;
   /**
-   * Registers an RPC method owned by this plugin.
    * Registers an RPC method owned by this plugin.
    * @param method Method name, usually in the `plugin:` namespace.
    * @param handler Method handler.
@@ -341,13 +311,11 @@ export interface PluginServer {
   registerRPC(method: string, handler: RpcHandler): void;
   /**
    * Schedules a cron callback.
-   * Schedules a cron callback.
    * @param expression Standard five-field cron expression.
    * @param handler Callback invoked on schedule.
    */
   cron(expression: string, handler: () => unknown | Promise<unknown>): void;
   /**
-   * Reads the plugin's saved configuration values.
    * Reads the plugin's saved configuration values.
    * @returns The saved configuration object, or an empty object when unset.
    */
@@ -355,15 +323,12 @@ export interface PluginServer {
 }
 
 /** Lifecycle callbacks installed by `definePlugin`.
- * Lifecycle callbacks installed by `definePlugin`.
  */
 export interface PluginDefinition {
   /** Called when Komari loads or reloads the plugin.
-   * Called when Komari loads or reloads the plugin.
    */
   load?: () => unknown | Promise<unknown>;
   /** Called before Komari unloads or replaces the plugin.
-   * Called before Komari unloads or replaces the plugin.
    */
   unload?: () => unknown | Promise<unknown>;
 }
@@ -444,7 +409,6 @@ export declare const rpcCatalog: RpcCatalog;
  *
  * The definition is returned unchanged, so this function preserves the
  * inferred type of the object passed to it.
- * The definition is returned unchanged, preserving the inferred input type.
  * @param definition Plugin load/unload callbacks.
  * @returns The same definition object.
  */

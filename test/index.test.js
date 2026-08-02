@@ -26,6 +26,7 @@ test("public SDK APIs and manifest fields keep English editor descriptions", () 
     assert.match(declarations, new RegExp(phrase.replace(/[.*+?^${}()|[\\]\\]/g, "\\$&")));
   }
 
+  assert.doesNotMatch(declarations, /(?:^|\r?\n)\s*\* ?([^\r\n]+)\r?\n\s*\* ?\1(?:\r?\n|$)/);
   assert.doesNotMatch(declarations, /[\u3400-\u9fff]/);
   assert.match(manifestSchema.description, /Komari plugin manifest/);
   assert.match(manifestSchema.properties.name.description, /Display name/);
