@@ -140,6 +140,9 @@ export interface RpcMethodMap {
   "admin:batchDeleteClipboard": RpcMethodSpec<{ ids: string[] }, null>;
   "admin:getDatabaseSize": RpcMethodSpec<undefined, Record<string, unknown>>;
   "admin:vacuumDatabase": RpcMethodSpec<undefined, Record<string, unknown>>;
+  "admin:dbQuery": RpcMethodSpec<DatabaseQueryParams, DatabaseQueryResult>;
+  "admin:dbExec": RpcMethodSpec<DatabaseExecParams, DatabaseExecResult>;
+  "admin:dbTables": RpcMethodSpec<DatabaseTablesParams | undefined, DatabaseTablesResult>;
   "admin:listMetricDefinitions": RpcMethodSpec<undefined, MetricDefinition[]>;
   "admin:updateMetricDefinition": RpcMethodSpec<{ name: string; retention_days: number }, MetricDefinition>;
   "admin:getMetricMigrationStatus": RpcMethodSpec<undefined, MetricMigrationStatus>;
@@ -212,6 +215,13 @@ export interface TaskResult { client: string; result: string; exit_code: number;
 export interface ExecTaskSummary { task_id: string; clients: string[]; queued_clients: string[]; }
 export interface PluginStatus { short: string; enabled: boolean; running: boolean; last_error?: string; [key: string]: unknown; }
 export interface MetricMigrationStatus { status: string; is_running: boolean; [key: string]: unknown; }
+export type DatabaseTarget = "main" | "metrics";
+export interface DatabaseQueryParams { database?: DatabaseTarget; sql: string; args?: JsonValue[]; limit?: number; }
+export interface DatabaseQueryResult { database: DatabaseTarget; driver: string; columns: string[]; rows: JsonValue[][]; row_count: number; truncated: boolean; }
+export interface DatabaseExecParams { database?: DatabaseTarget; sql: string; args?: JsonValue[]; }
+export interface DatabaseExecResult { database: DatabaseTarget; driver: string; rows_affected: number; last_insert_id: number | null; }
+export interface DatabaseTablesParams { database?: DatabaseTarget; }
+export interface DatabaseTablesResult { database: DatabaseTarget; driver: string; tables: string[]; }
 
 export interface PluginRequestContext {
   principal?: {
@@ -260,6 +270,18 @@ export interface PluginResponse {
   /** Returns true when the client has disconnected.
    */
   isAborted(): boolean;
+}
+
+export interface PluginSessionOptions {
+  user_uuid: string;
+  expires: number;
+  user_agent?: string;
+  ip?: string;
+  login_method: string;
+}
+
+export interface PluginSession {
+  session: string;
 }
 
 /** Handler used by `server.route`.
@@ -316,6 +338,11 @@ export interface PluginServer {
    * @param params Method parameters.
    */
   call<T = unknown>(method: string, ...params: any[]): Promise<T>;
+  /**
+   * Creates a native Komari session for one existing user.
+   * @remarks Requires the `permissions.allowSystemRPC` manifest permission.
+   */
+  createSession(options: PluginSessionOptions): Promise<PluginSession>;
   /**
    * Registers an RPC method owned by this plugin.
    * @param method Method name, usually in the `plugin:` namespace.
