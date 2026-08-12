@@ -397,9 +397,18 @@ export interface PluginPage {
 }
 
 export interface PluginConfigurationItem {
-  key: string;
+  key?: string;
   name: I18nText;
-  type: "string" | "number" | "select" | "switch" | "title" | "richtext";
+  type:
+    | "string"
+    | "number"
+    | "select"
+    | "switch"
+    | "title"
+    | "textbox"
+    | "richtext"
+    | "nodes"
+    | "pingtasks";
   options?: string;
   default?: JsonValue;
   required?: boolean;

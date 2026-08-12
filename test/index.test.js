@@ -69,6 +69,32 @@ test("manifest validation catches server-incompatible values", () => {
   assert.ok(sdk.validateManifest({ name: "Demo", short: "demo", pages: [{ title: "Page", type: "redirect", url: "https://example.com" }] }).length > 0);
 });
 
+test("manifest validation supports managed selector and textbox fields", () => {
+  const configuration = {
+    type: "managed",
+    data: [
+      { name: "Node group", type: "title" },
+      { name: "<strong>Choose monitored items</strong>", type: "textbox" },
+      { key: "nodes", name: "Nodes", type: "nodes", default: "[]" },
+      { key: "tasks", name: "Ping tasks", type: "pingtasks", default: "[]" },
+    ],
+  };
+  assert.deepEqual(
+    sdk.validateManifest({ name: "Demo", short: "demo", configuration }),
+    [],
+  );
+  assert.ok(
+    sdk.validateManifest({
+      name: "Demo",
+      short: "demo",
+      configuration: {
+        type: "managed",
+        data: [{ name: "Nodes", type: "nodes" }],
+      },
+    }).length > 0,
+  );
+});
+
 test("rpc client forwards calls and checks the live method list", async () => {
   const calls = [];
   const server = {

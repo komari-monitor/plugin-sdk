@@ -42,13 +42,13 @@ function validateManifest(manifest) {
     if (!isObject(manifest.configuration) || manifest.configuration.type !== "managed" || !Array.isArray(manifest.configuration.data)) {
       errors.push("configuration must be a managed configuration with a data array");
     } else {
-      const itemTypes = new Set(["string", "number", "select", "switch", "title", "richtext"]);
+      const itemTypes = new Set(["string", "number", "select", "switch", "title", "textbox", "richtext", "nodes", "pingtasks"]);
       manifest.configuration.data.forEach((item, index) => {
         if (!isObject(item)) {
           errors.push(`configuration.data[${index}] must be an object`);
           return;
         }
-        if (typeof item.key !== "string" || !item.key.trim()) errors.push(`configuration.data[${index}].key is required`);
+        if (item.type !== "title" && item.type !== "textbox" && (typeof item.key !== "string" || !item.key.trim())) errors.push(`configuration.data[${index}].key is required`);
         if (!hasText(item.name)) errors.push(`configuration.data[${index}].name is required`);
         if (!itemTypes.has(item.type)) errors.push(`configuration.data[${index}].type is invalid`);
       });

@@ -73,16 +73,23 @@
     "configurationItem": {
       "description": "One managed configuration field.",
       "type": "object",
-      "required": ["key", "name", "type"],
+      "required": ["name", "type"],
       "properties": {
         "key": { "type": "string", "minLength": 1, "description": "Stable configuration key." },
         "name": { "$ref": "#/$defs/localizedText", "description": "Label shown in the configuration UI." },
-        "type": { "enum": ["string", "number", "select", "switch", "title", "richtext"], "description": "Editor control type." },
+        "type": { "enum": ["string", "number", "select", "switch", "title", "textbox", "richtext", "nodes", "pingtasks"], "description": "Editor control type." },
         "options": { "type": "string", "description": "Options for select controls." },
         "default": { "description": "Default value." },
         "required": { "type": "boolean", "description": "Whether a value is required." },
         "help": { "$ref": "#/$defs/localizedText", "description": "Help text shown below the field." }
       },
+      "allOf": [
+        {
+          "if": { "properties": { "type": { "enum": ["title", "textbox"] } } },
+          "then": {},
+          "else": { "required": ["key"] }
+        }
+      ],
       "additionalProperties": false
     }
   }
