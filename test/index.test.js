@@ -37,7 +37,7 @@ test("public SDK APIs and manifest fields keep English editor descriptions", () 
 test("package and RPC catalog versions distinguish SDK release from Komari compatibility", () => {
   const packageJson = JSON.parse(fs.readFileSync(path.join(__dirname, "../package.json"), "utf8"));
   const rpcCatalog = JSON.parse(fs.readFileSync(path.join(__dirname, "../src/rpc-catalog.json"), "utf8"));
-  assert.equal(packageJson.version, "1.4.1");
+  assert.equal(packageJson.version, "1.4.3");
   assert.equal(packageJson.komariVersion, "1.4.x");
   assert.equal(rpcCatalog.komari, "1.4.x");
 });
