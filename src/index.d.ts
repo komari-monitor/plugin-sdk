@@ -272,18 +272,6 @@ export interface PluginResponse {
   isAborted(): boolean;
 }
 
-export interface PluginSessionOptions {
-  user_uuid: string;
-  expires: number;
-  user_agent?: string;
-  ip?: string;
-  login_method: string;
-}
-
-export interface PluginSession {
-  session: string;
-}
-
 /** Handler used by `server.route`.
  */
 export type RouteHandler = (req: PluginRequest, res: PluginResponse) => unknown | Promise<unknown>;
@@ -338,11 +326,6 @@ export interface PluginServer {
    * @param params Method parameters.
    */
   call<T = unknown>(method: string, ...params: any[]): Promise<T>;
-  /**
-   * Creates a native Komari session for one existing user.
-   * @remarks Requires the `permissions.allowSystemRPC` manifest permission.
-   */
-  createSession(options: PluginSessionOptions): Promise<PluginSession>;
   /**
    * Registers an RPC method owned by this plugin.
    * @param method Method name, usually in the `plugin:` namespace.
